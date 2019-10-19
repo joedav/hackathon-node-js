@@ -216,7 +216,10 @@ const server = app.listen(3000, () => {
                 if(evento.includes(texto[2])){ // verifica se o evento é um dos quatro
                   // variavel auxiliar pra data
                   // pessoas = 
-                  let tw = {nomeEmpresa: texto[1], evento: texto[2], dataEvento: "2019/05/01", horaEvento: texto[4], descricao: texto[5], pessoas: {nome: "Joe", nome: "Nickollas"}};
+                  let tw = {nomeEmpresa: texto[1], evento: texto[2], dataEvento: "2019/05/01", horaEvento: texto[4], descricao: texto[5], pessoas: 
+                                                                                                            [
+                                                                                                              {nome: "Joe"},
+                                                                                                              {nome: "Nickollas"}]};
                   DbService.insertTweet(tw);
 
                   // let data = texto[3];

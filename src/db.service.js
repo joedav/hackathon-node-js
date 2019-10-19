@@ -62,9 +62,8 @@ function insertTweet(tweet){
             });
           } else {
             const idTweet = results.insertId;
-            
+
             if(Array.isArray(tweet.pessoas)){
-              console.log("pessoas!");
               const promisesPessoas = tweet.pessoas.map(pessoa =>{
                 return inserirPessoas(pessoa, idTweet);
               });
@@ -82,7 +81,7 @@ function insertTweet(tweet){
                       console.log(`Tweet ${tweet.evento} adicionado com ID ${results.insertId}`);
                       resultadoPessoas.forEach((resultadoPessoa, index) => {
                         console.log(`Pessoa ${tweet.pessoas[index].nome} Adicionado com Id ${resultadoPessoa.insertId}`);
-                        tweet.pessoa[index].Id = resultadoPessoa.insertId;
+                        tweet.pessoas[index].Id = resultadoPessoa.insertId;
                       });
                       tweet.id = idTweet;
                       resolve(tweet);

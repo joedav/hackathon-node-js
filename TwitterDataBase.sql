@@ -22,3 +22,6 @@ CREATE TABLE Pessoas_Tweet(
     KEY FK_TWEET (id_tweet),
 	CONSTRAINT FK_TWEET FOREIGN KEY (id_tweet) REFERENCES TWEET (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
+
+truncate table tweet;
+truncate table pessoas_tweet;
