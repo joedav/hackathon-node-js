@@ -181,7 +181,7 @@ const server = app.listen(3000, () => {
   DbService.conectar({
     host: 'localhost', 
     porta: 3306, 
-    banco: 'pet_shop', 
+    banco: 'TWITTER', 
     usuario: 'root', 
     senha: '123456'
   })
@@ -199,6 +199,42 @@ const server = app.listen(3000, () => {
       TwitterService.listarTweetsHitBRA()
         .then(tweets => {
           console.log(`Recebido ${tweets.length} para processar`);
+
+          for(tweet of tweets){
+            let texto = tweet.texto.split(" ");
+
+            if(texto[0] == "#hackathonhitbra"){
+              // variavel auxiliar para verificação de acentos
+              let acentos = "áàãâäéèêëíìîïóòõôöúùûüçÁÀÃÂÄÉÈÊËÍÌÎÏÓÒÕÖÔÚÙÛÜÇ".split('');              
+              let valida;
+              for(letras of texto[1]){
+                if(acentos.includes(letras)){ // se houver um caracter com acento ele retorna true
+                  return valida = true;  
+                }
+              } if(valida!=true){
+                let evento = ["festa", "churrasco", "reunião", "férias"];
+                if(evento.includes(texto[2])){ // verifica se o evento é um dos quatro
+                  // variavel auxiliar pra data
+                  // pessoas = 
+                  let tw = {nomeEmpresa: texto[1], evento: texto[2], dataEvento: "2019/05/01", horaEvento: texto[4], descricao: texto[5], pessoas: {nome: "Joe", nome: "Nickollas"}};
+                  DbService.insertTweet(tw);
+
+                  // let data = texto[3];
+                  /*if(){
+
+                    console.log(texto);
+                  }*/
+                }
+              }
+              
+
+              //console.log("contem acento");
+              
+              
+              }
+          }
+          
+          
           /*
             *** Implemente aqui sua lógica para ler o tweets ***
             
@@ -229,4 +265,15 @@ const server = app.listen(3000, () => {
       console.error(erro);
       server.close();
     });
+});
+
+app.post("/tweets", (request, response)=>{
+  DbService.inserirTweet(request.body)
+    .then(tweet =>{
+      response.status(201).send(tweet);
+    })
+    .catch(erro =>{
+      console.error("Erro ao inserir Tweet!", erro);
+      response.status(500).send("Erro ao inserir tweet no banco!");
+    })
 });
