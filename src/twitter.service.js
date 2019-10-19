@@ -20,7 +20,7 @@ function listarTweetsHitBRA(userId) {
   if (process.env.NODE_ENV === 'production') {
     return client.get('statuses/user_timeline', {
       user_id: '1014911910188331008',
-      count: 100 // trocar para 20 quando for rodar no tweet
+      count: 100 // trocar para 20 quando for rodar no tweet e rudar com npm start
     })
       .then(
         tweets => tweets.map(tweet => {
