@@ -1,13 +1,13 @@
-const express = require('express');
+const express = require("express");
 
-const TwitterService = require('./twitter.service');
-const DbService = require('./db.service');
+const TwitterService = require("./twitter.service");
+const DbService = require("./db.service");
 
 const app = express();
 
 app.use(express.json());
 
-app.get('/listaEventosPorEmpresa', (request, response) => {
+app.get("/listaEventosPorEmpresa", (request, response) => {
   /*
     entrada:
     {
@@ -46,7 +46,7 @@ app.get('/listaEventosPorEmpresa', (request, response) => {
   response.send();
 });
 
-app.get('/listaEventosPorData', (request, response) => {
+app.get("/listaEventosPorData", (request, response) => {
   /*
     entrada:
     {
@@ -87,7 +87,7 @@ app.get('/listaEventosPorData', (request, response) => {
   response.send();
 });
 
-app.get('/listaEventosPorPessoa', (request, response) => {
+app.get("/listaEventosPorPessoa", (request, response) => {
   /*
     entrada:
     {
@@ -123,7 +123,29 @@ app.get('/listaEventosPorPessoa', (request, response) => {
   response.send();
 });
 
-app.get('/listaEventosRepetitivos', (request, response) => {
+app.get("/listaEventosRepetitivos", (request, response) => {
+  let promiseBuscaBanco = null;
+
+  if (request.query.nome != null) {
+    promiseBuscaBanco = DbService.consultarClientePorNome(request.query.nome);
+  } else {
+    promiseBuscaBanco = DbService.listarTodasPessoas();
+  }
+
+  promiseBuscaBanco
+    .then(pessoas => {
+      if (pessoas.length > 0) {
+        response.send(pessoas);
+      } else {
+        response.status(204).send();
+      }
+    })
+    .catch(erro => {
+      console.error("Erro ao listar clientes", erro);
+      response
+        .status(500)
+        .send("Ocorreu um erro ao listar clientes do banco de dados");
+    });
   /*
     entrada:
     {
@@ -145,10 +167,10 @@ app.get('/listaEventosRepetitivos', (request, response) => {
       }
     ]
   */
-  response.send();
+  // response.send();
 });
 
-app.get('/listaHorarios', (request, response) => {
+app.get("/listaHorarios", (request, response) => {
   /*
     entrada:
     {
@@ -176,66 +198,99 @@ app.get('/listaHorarios', (request, response) => {
 });
 
 const server = app.listen(3000, () => {
-  console.log('Servidor iniciado');
+  console.log("Servidor iniciado");
 
   DbService.conectar({
-    host: 'localhost', 
-    porta: 3306, 
-    banco: 'TWITTER', 
-    usuario: 'root', 
-    senha: '123456'
+    host: "localhost",
+    porta: 3306,
+    banco: "TWITTER",
+    usuario: "root",
+    senha: ""
   })
     .then(() => {
-      console.log('Conexão com banco de dados estabelecida');
+      console.log("Conexão com banco de dados estabelecida");
 
       TwitterService.newClient({
-        consumer_key: 'URKM9MWFpwZgKfbxwsGqNE0MT',
-        consumer_secret: 'HXOZCQPhv2MhAaLSj07Ss2ODhQh64IObDYstYUwG8EyLzYQOFD',
-        access_token_key: '187744844-EHU5axWK55BmRappDWkoVlI6eSpfZ3NV1W7z2kMJ',
-        access_token_secret: 'DHx58GbWYrC87Fs026RitPaNYyojNJ8L8d47MvmRbj9uh'
+        consumer_key: "URKM9MWFpwZgKfbxwsGqNE0MT",
+        consumer_secret: "HXOZCQPhv2MhAaLSj07Ss2ODhQh64IObDYstYUwG8EyLzYQOFD",
+        access_token_key: "187744844-EHU5axWK55BmRappDWkoVlI6eSpfZ3NV1W7z2kMJ",
+        access_token_secret: "DHx58GbWYrC87Fs026RitPaNYyojNJ8L8d47MvmRbj9uh"
       });
-      console.log('Client do Twitter criado');
+      console.log("Client do Twitter criado");
 
       TwitterService.listarTweetsHitBRA()
         .then(tweets => {
           console.log(`Recebido ${tweets.length} para processar`);
 
-          for(tweet of tweets){
+          for (tweet of tweets) {
             let texto = tweet.texto.split(" ");
 
-            if(texto[0] == "#hackathonhitbra"){
+            if (texto[0] == "#hackathonhitbra") {
               // variavel auxiliar para verificação de acentos
-              let acentos = "áàãâäéèêëíìîïóòõôöúùûüçÁÀÃÂÄÉÈÊËÍÌÎÏÓÒÕÖÔÚÙÛÜÇ".split('');              
+              let acentos = "áàãâäéèêëíìîïóòõôöúùûüçÁÀÃÂÄÉÈÊËÍÌÎÏÓÒÕÖÔÚÙÛÜÇ-/~.,*|".split(
+                ""
+              );
               let valida;
-              for(letras of texto[1]){
-                if(acentos.includes(letras)){ // se houver um caracter com acento ele retorna true
-                  return valida = true;  
+              for (letras of texto[1]) {
+                if (acentos.includes(letras)) {
+                  // se houver um caracter com acento ele retorna true
+                  return (valida = true);
                 }
-              } if(valida!=true){
+              }
+              if (valida != true) {
                 let evento = ["festa", "churrasco", "reunião", "férias"];
-                if(evento.includes(texto[2])){ // verifica se o evento é um dos quatro
+                if (evento.includes(texto[2])) {
+                  // verifica se o evento é um dos quatro
                   // variavel auxiliar pra data
-                  // pessoas = 
-                  let data = texto[3].split("/").reverse().join("-");
-                  let tw = {nomeEmpresa: texto[1], evento: texto[2], dataEvento: data, horaEvento: texto[4], descricao: texto[5], pessoas: [{nome: "Joe"}, {nome: "Nickollas"}]};
-                  DbService.insertTweet(tw);
+                  var nomes = tweet.texto.slice(tweet.texto.indexOf("*") - 1);
+                  let pesso = nomes.split(" *");
+                  pesso.splice("", 1);
+                  let people = [];
+                  for (pe of pesso) {
+                    let valid = false;
+                    for (letras of pe) {
+                      if (acentos.includes(letras)) valid = true; // verifica se á algum acento no nome
+                    }
+                    if (valid == false) {
+                      people.push({ nome: pe });
+                    }
+                  }
+                  let descr = tweet.texto
+                    .slice(
+                      tweet.texto.indexOf(":") + 4,
+                      tweet.texto.indexOf("*")
+                    )
+                    .replace("  ", "");
+                  if (descr.length <= 50) {
+                    console.log(descr);
+                    let data = texto[3]
+                      .split("/")
+                      .reverse()
+                      .join("/");
+                    let tw = {
+                      nomeEmpresa: texto[1],
+                      evento: texto[2],
+                      dataEvento: data,
+                      horaEvento: texto[4],
+                      descricao: descr,
+                      pessoas: people
+                    };
+                    console.log(tw);
+                    DbService.insertTweet(tw);
 
-                  // let data = texto[3];
-                  /*if(){
+                    // let data = texto[3];
+                    /*if(){
 
                     console.log(texto);
                   }*/
+                  }
                 }
               }
-              
 
               //console.log("contem acento");
-              
-              
-              }
+            }
           }
-          
-          
+
           /*
             *** Implemente aqui sua lógica para ler o tweets ***
             
@@ -257,24 +312,26 @@ const server = app.listen(3000, () => {
           */
         })
         .catch(erro => {
-          console.error('Erro ao listar Tweets da Hit-BRA:', erro);
+          console.error("Erro ao listar Tweets da Hit-BRA:", erro);
           server.close();
         });
     })
     .catch(erro => {
-      console.log('Devido erro ao conectar com o banco de dados a aplicação será encerrada');
+      console.log(
+        "Devido erro ao conectar com o banco de dados a aplicação será encerrada"
+      );
       console.error(erro);
       server.close();
     });
 });
 
-app.post("/tweets", (request, response)=>{
+app.post("/tweets", (request, response) => {
   DbService.inserirTweet(request.body)
-    .then(tweet =>{
+    .then(tweet => {
       response.status(201).send(tweet);
     })
-    .catch(erro =>{
+    .catch(erro => {
       console.error("Erro ao inserir Tweet!", erro);
       response.status(500).send("Erro ao inserir tweet no banco!");
-    })
+    });
 });

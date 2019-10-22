@@ -14,6 +14,8 @@ CREATE TABLE TWEET (
 select * from tweet;
 select * from pessoas_tweet;
 
+select * from pessoas_tweet ;
+
 CREATE TABLE Pessoas_Tweet(
 	id int unsigned NOT NULL AUTO_INCREMENT,
     id_tweet int unsigned NOT NULL,
@@ -23,5 +25,5 @@ CREATE TABLE Pessoas_Tweet(
 	CONSTRAINT FK_TWEET FOREIGN KEY (id_tweet) REFERENCES TWEET (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB;
 
-truncate table tweet;
-truncate table pessoas_tweet;
+delete from tweet where id;
+delete from pessoas_tweet where id;
